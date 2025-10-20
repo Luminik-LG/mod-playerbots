@@ -3498,22 +3498,22 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target, Item* itemTarget)
 
 
     // check if the actual target is valid, spell system uses targets.GetUnitTarget(), GetItemTarget(), GetGOTarget() internally.
-    Unit* unitTarget = targets.GetUnitTarget();
-    if (unitTarget && (!unitTarget->IsInWorld() || unitTarget->IsDuringRemoveFromWorld()))
+    Unit* uTarget = targets.GetUnitTarget();
+    if (uTarget && (!uTarget->IsInWorld() || uTarget->IsDuringRemoveFromWorld()))
     {
         // fail if the spell has a unit target that is invalid or being removed from the world
         delete spell;
         return false;
     }
-    Item* itemTarget = targets.GetItemTarget();
-    if (!itemTarget && (spellInfo->Targets & (TARGET_FLAG_ITEM | TARGET_FLAG_GAMEOBJECT_ITEM)))
+    Item* iTarget = targets.GetItemTarget();
+    if (!iTarget && (spellInfo->Targets & (TARGET_FLAG_ITEM | TARGET_FLAG_GAMEOBJECT_ITEM)))
     {
         // fail only if the spell requires a specific item or GO item to cast but the bot does not have one
         delete spell;
         return false;
     }
-    GameObject* goTarget = targets.GetGOTarget();
-    if (goTarget && !goTarget->isSpawned())
+    GameObject* gTarget = targets.GetGOTarget();
+    if (gTarget && !gTarget->isSpawned())
     {
         // fail if the spell has a GO target that is not spawned or does not exist
         delete spell;

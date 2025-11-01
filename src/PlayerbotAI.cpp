@@ -2112,7 +2112,6 @@ bool PlayerbotAI::IsMainTank(Player* player)
     }
 
     ObjectGuid mainTank = ObjectGuid();
-    Group::MemberSlotList const& slots = group->GetMemberSlots();
 
     for (Group::member_citerator itr = slots.begin(); itr != slots.end(); ++itr)
     {
@@ -2228,20 +2227,17 @@ bool PlayerbotAI::IsHealAssistantOfIndex(Player* player, int index)
 {
     Group* group = player->GetGroup();
     if (!group)
-    {
         return false;
-    }
-    Group::MemberSlotList const& slots = group->GetMemberSlots();
+
     int counter = 0;
     for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
     {
         Player* member = ref->GetSource();
-        if (group->IsAssistant(member->GetGUID()) && IsHeal(member))
+        if (member && group->IsAssistant(member->GetGUID()) && IsHeal(member))
         {
             if (index == counter)
-            {
                 return player == member;
-            }
+
             counter++;
         }
     }
@@ -2249,12 +2245,11 @@ bool PlayerbotAI::IsHealAssistantOfIndex(Player* player, int index)
     for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
     {
         Player* member = ref->GetSource();
-        if (!group->IsAssistant(member->GetGUID()) && IsHeal(member))
+        if (member && !group->IsAssistant(member->GetGUID()) && IsHeal(member))
         {
             if (index == counter)
-            {
                 return player == member;
-            }
+
             counter++;
         }
     }
@@ -2267,20 +2262,17 @@ bool PlayerbotAI::IsRangedDpsAssistantOfIndex(Player* player, int index)
 {
     Group* group = player->GetGroup();
     if (!group)
-    {
         return false;
-    }
-    Group::MemberSlotList const& slots = group->GetMemberSlots();
+
     int counter = 0;
     for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
     {
         Player* member = ref->GetSource();
-        if (group->IsAssistant(member->GetGUID()) && IsRangedDps(member))
+        if (member && group->IsAssistant(member->GetGUID()) && IsRangedDps(member))
         {
             if (index == counter)
-            {
                 return player == member;
-            }
+
             counter++;
         }
     }
@@ -2288,12 +2280,11 @@ bool PlayerbotAI::IsRangedDpsAssistantOfIndex(Player* player, int index)
     for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
     {
         Player* member = ref->GetSource();
-        if (!group->IsAssistant(member->GetGUID()) && IsRangedDps(member))
+        if (member && !group->IsAssistant(member->GetGUID()) && IsRangedDps(member))
         {
             if (index == counter)
-            {
                 return player == member;
-            }
+
             counter++;
         }
     }
@@ -2306,20 +2297,17 @@ bool PlayerbotAI::IsAssistTankOfIndex(Player* player, int index)
 {
     Group* group = player->GetGroup();
     if (!group)
-    {
         return false;
-    }
-    Group::MemberSlotList const& slots = group->GetMemberSlots();
+
     int counter = 0;
     for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
     {
         Player* member = ref->GetSource();
-        if (group->IsAssistant(member->GetGUID()) && IsAssistTank(member))
+        if (member && group->IsAssistant(member->GetGUID()) && IsAssistTank(member))
         {
             if (index == counter)
-            {
                 return player == member;
-            }
+
             counter++;
         }
     }
@@ -2327,12 +2315,11 @@ bool PlayerbotAI::IsAssistTankOfIndex(Player* player, int index)
     for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
     {
         Player* member = ref->GetSource();
-        if (!group->IsAssistant(member->GetGUID()) && IsAssistTank(member))
+        if (member && !group->IsAssistant(member->GetGUID()) && IsAssistTank(member))
         {
             if (index == counter)
-            {
                 return player == member;
-            }
+
             counter++;
         }
     }

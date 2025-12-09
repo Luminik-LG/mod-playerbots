@@ -1070,16 +1070,21 @@ AiPlayerbot.ProbTeleToBankers = 0.25
 # Control probability weights for bots teleporting to Capital city bankers
 # Sum of weights need not be 100. Set to 0 to disable teleporting to the city.
 AiPlayerbot.EnableWeightTeleToCityBankers = 1
-AiPlayerbot.TeleToStormwindWeight = 2
-AiPlayerbot.TeleToIronforgeWeight = 1
-AiPlayerbot.TeleToDarnassusWeight = 1
-AiPlayerbot.TeleToExodarWeight = 1
-AiPlayerbot.TeleToOrgrimmarWeight = 2
-AiPlayerbot.TeleToUndercityWeight = 1
-AiPlayerbot.TeleToThunderBluffWeight = 1
-AiPlayerbot.TeleToSilvermoonCityWeight = 1
-AiPlayerbot.TeleToShattrathCityWeight = 1
-AiPlayerbot.TeleToDalaranWeight = 1
+AiPlayerbot.TeleToStormwindWeight = 3
+AiPlayerbot.TeleToIronforgeWeight = 2
+AiPlayerbot.TeleToDarnassusWeight = 2
+AiPlayerbot.TeleToExodarWeight = 2
+AiPlayerbot.TeleToOrgrimmarWeight = 3
+AiPlayerbot.TeleToUndercityWeight = 2
+AiPlayerbot.TeleToThunderBluffWeight = 2
+AiPlayerbot.TeleToSilvermoonCityWeight = 2
+AiPlayerbot.TeleToShattrathCityWeight = 2
+AiPlayerbot.TeleToDalaranWeight = 2
+AiPlayerbot.TeleToCabestanWeight = 1
+AiPlayerbot.TeleToZone52Weight = 1
+AiPlayerbot.TeleToLongwatchWeight = 1
+AiPlayerbot.TeleToGadgetzanWeight = 1
+AiPlayerbot.TeleToBootybayWeight = 1
 
 # How far randombots are teleported after death
 AiPlayerbot.RandomBotTeleportDistance = 100

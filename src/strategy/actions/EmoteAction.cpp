@@ -143,8 +143,28 @@ Unit* EmoteActionBase::GetTarget()
     return target;
 }
 
+#include <vector>
+#include <map>
+#include <random>
+#include <algorithm>
+#include <ctime>
+
 bool EmoteActionBase::ReceiveEmote(Player* source, uint32 emote, bool verbal)
 {
+    // ----- UN SEUL BOT PAR EMOTE AVEC RESET -----
+    // map statique : emote ID -> timestamp du dernier bot qui a répondu
+    static std::map<uint32, std::chrono::steady_clock::time_point> lastResponded;
+
+    auto now = std::chrono::steady_clock::now();
+    constexpr auto cooldown = std::chrono::seconds(20);  // délai avant qu'un autre bot puisse répondre à la même emote
+
+    auto it = lastResponded.find(emote);
+    if (it != lastResponded.end() && now - it->second < cooldown)
+        return false;  // un bot a déjà répondu récemment
+
+    // Ce bot va répondre, on met à jour le timestamp
+    lastResponded[emote] = now;
+
     uint32 emoteId = 0;
     uint32 textEmote = 0;
     std::string emoteText;
@@ -612,12 +632,37 @@ bool EmoteActionBase::ReceiveEmote(Player* source, uint32 emote, bool verbal)
             bot->Yell("You think that's going to help you?!", LANG_UNIVERSAL);
             break;*/
         default:
-            // return false;
-            // bot->HandleEmoteCommand(EMOTE_ONESHOT_QUESTION);
-            // bot->Say("Mmmmmkaaaaaay...", LANG_UNIVERSAL);
-            break;
-    }
+        {
+            const std::string sender = source->GetName();
+            static const std::vector<std::string> variants = {"Ok " + sender + "!",
+                                                              "Alright " + sender + ".",
+                                                              "Got it " + sender + ".",
+                                                              "Roger that " + sender + ".",
+                                                              "Understood " + sender + ".",
+                                                              "Copy that " + sender + ".",
+                                                              "Sure thing " + sender + ".",
+                                                              "Okay " + sender + ", noted.",
+                                                              "Affirmative " + sender + ".",
+                                                              "Will do " + sender + ".",
+                                                              "Right " + sender + ".",
+                                                              "No problem " + sender + ".",
+                                                              "Consider it done " + sender + ".",
+                                                              "Sounds good " + sender + ".",
+                                                              "Alrighty " + sender + ".",
+                                                              "Gotcha " + sender + ".",
+                                                              "Message received " + sender + ".",
+                                                              "All set " + sender + ".",
+                                                              "Understood loud and clear " + sender + ".",
+                                                              "Thanks " + sender + ", will do!"};
 
+            // Choisit une variante aléatoire
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> dis(0, variants.size() - 1);
+            emoteText = variants[dis(gen)];
+            break;
+        }
+    }
     if (source && !bot->isMoving() && !bot->HasInArc(static_cast<float>(M_PI), source, sPlayerbotAIConfig->farDistance))
         sServerFacade->SetFacingTo(bot, source);
 
@@ -813,65 +858,284 @@ bool TalkAction::Execute(Event event)
     return false;
 }
 
+#include <ctime>
+#include <map>
+#include <vector>
+
+#include "EmoteAction.h"
+#include "Player.h"
+#include "Unit.h"
+
 uint32 TalkAction::GetRandomEmote(Unit* unit, bool textEmote)
 {
-    std::vector<uint32> types;
-    if (textEmote)
+    
+    // Cooldown simple (stocké dans le bot lui-même si possible)
+    static time_t lastEmote = 0;
+    time_t now = time(nullptr);
+    if (now - lastEmote < 3)
+        return 0;
+    lastEmote = now;
+    
+    // ----- POOL D'EMOTES -----
+static const std::vector<uint32> emotes =
     {
-        if (!urand(0, 20))
-        {
-            // expressions
-            types.push_back(TEXT_EMOTE_BOW);
-            types.push_back(TEXT_EMOTE_RUDE);
-            types.push_back(TEXT_EMOTE_CRY);
-            types.push_back(TEXT_EMOTE_LAUGH);
-            types.push_back(TEXT_EMOTE_POINT);
-            types.push_back(TEXT_EMOTE_CHEER);
-            types.push_back(TEXT_EMOTE_SHY);
-            types.push_back(TEXT_EMOTE_JOKE);
-        }
-        else
-        {
-            // talk
-            types.push_back(TEXT_EMOTE_TALK);
-            types.push_back(TEXT_EMOTE_TALKEX);
-            types.push_back(TEXT_EMOTE_TALKQ);
+        // Text Emotes
+        TEXT_EMOTE_AGREE,
+        TEXT_EMOTE_AMAZE,
+        TEXT_EMOTE_ANGRY,
+        TEXT_EMOTE_APOLOGIZE,
+        TEXT_EMOTE_APPLAUD,
+        TEXT_EMOTE_BASHFUL,
+        TEXT_EMOTE_BECKON,
+        TEXT_EMOTE_BEG,
+        TEXT_EMOTE_BITE,
+        TEXT_EMOTE_BLEED,
+        TEXT_EMOTE_BLINK,
+        TEXT_EMOTE_BLUSH,
+        TEXT_EMOTE_BONK,
+        TEXT_EMOTE_BORED,
+        TEXT_EMOTE_BOUNCE,
+        TEXT_EMOTE_BRB,
+        TEXT_EMOTE_BOW,
+        TEXT_EMOTE_BURP,
+        TEXT_EMOTE_BYE,
+        TEXT_EMOTE_CACKLE,
+        TEXT_EMOTE_CHEER,
+        TEXT_EMOTE_CHICKEN,
+        TEXT_EMOTE_CHUCKLE,
+        TEXT_EMOTE_CLAP,
+        TEXT_EMOTE_CONFUSED,
+        TEXT_EMOTE_CONGRATULATE,
+        TEXT_EMOTE_COUGH,
+        TEXT_EMOTE_COWER,
+        TEXT_EMOTE_CRACK,
+        TEXT_EMOTE_CRINGE,
+        TEXT_EMOTE_CRY,
+        TEXT_EMOTE_CURIOUS,
+        TEXT_EMOTE_CURTSEY,
+        TEXT_EMOTE_DANCE,
+        TEXT_EMOTE_DRINK,
+        TEXT_EMOTE_DROOL,
+        TEXT_EMOTE_EAT,
+        TEXT_EMOTE_EYE,
+        TEXT_EMOTE_FART,
+        TEXT_EMOTE_FIDGET,
+        TEXT_EMOTE_FLEX,
+        TEXT_EMOTE_FROWN,
+        TEXT_EMOTE_GASP,
+        TEXT_EMOTE_GAZE,
+        TEXT_EMOTE_GIGGLE,
+        TEXT_EMOTE_GLARE,
+        TEXT_EMOTE_GLOAT,
+        TEXT_EMOTE_GREET,
+        TEXT_EMOTE_GRIN,
+        TEXT_EMOTE_GROAN,
+        TEXT_EMOTE_GROVEL,
+        TEXT_EMOTE_GUFFAW,
+        TEXT_EMOTE_HAIL,
+        TEXT_EMOTE_HAPPY,
+        TEXT_EMOTE_HELLO,
+        TEXT_EMOTE_HUG,
+        TEXT_EMOTE_HUNGRY,
+        TEXT_EMOTE_KISS,
+        TEXT_EMOTE_KNEEL,
+        TEXT_EMOTE_LAUGH,
+        TEXT_EMOTE_LAYDOWN,
+        TEXT_EMOTE_MESSAGE,
+        TEXT_EMOTE_MOAN,
+        TEXT_EMOTE_MOON,
+        TEXT_EMOTE_MOURN,
+        TEXT_EMOTE_NO,
+        TEXT_EMOTE_NOD,
+        TEXT_EMOTE_NOSEPICK,
+        TEXT_EMOTE_PANIC,
+        TEXT_EMOTE_PEER,
+        TEXT_EMOTE_PLEAD,
+        TEXT_EMOTE_POINT,
+        TEXT_EMOTE_POKE,
+        TEXT_EMOTE_PRAY,
+        TEXT_EMOTE_ROAR,
+        TEXT_EMOTE_ROFL,
+        TEXT_EMOTE_RUDE,
+        TEXT_EMOTE_SALUTE,
+        TEXT_EMOTE_SCRATCH,
+        TEXT_EMOTE_SEXY,
+        TEXT_EMOTE_SHAKE,
+        TEXT_EMOTE_SHOUT,
+        TEXT_EMOTE_SHRUG,
+        TEXT_EMOTE_SHY,
+        TEXT_EMOTE_SIGH,
+        TEXT_EMOTE_SIT,
+        TEXT_EMOTE_SLEEP,
+        TEXT_EMOTE_SNARL,
+        TEXT_EMOTE_SPIT,
+        TEXT_EMOTE_STARE,
+        TEXT_EMOTE_SURPRISED,
+        TEXT_EMOTE_SURRENDER,
+        TEXT_EMOTE_TALK,
+        TEXT_EMOTE_TALKEX,
+        TEXT_EMOTE_TALKQ,
+        TEXT_EMOTE_TAP,
+        TEXT_EMOTE_THANK,
+        TEXT_EMOTE_THREATEN,
+        TEXT_EMOTE_TIRED,
+        TEXT_EMOTE_VICTORY,
+        TEXT_EMOTE_WAVE,
+        TEXT_EMOTE_WELCOME,
+        TEXT_EMOTE_WHINE,
+        TEXT_EMOTE_WHISTLE,
+        TEXT_EMOTE_WORK,
+        TEXT_EMOTE_YAWN,
+        TEXT_EMOTE_BOGGLE,
+        TEXT_EMOTE_CALM,
+        TEXT_EMOTE_COLD,
+        TEXT_EMOTE_COMFORT,
+        TEXT_EMOTE_CUDDLE,
+        TEXT_EMOTE_DUCK,
+        TEXT_EMOTE_INSULT,
+        TEXT_EMOTE_INTRODUCE,
+        TEXT_EMOTE_JK,
+        TEXT_EMOTE_LICK,
+        TEXT_EMOTE_LISTEN,
+        TEXT_EMOTE_LOST,
+        TEXT_EMOTE_MOCK,
+        TEXT_EMOTE_PONDER,
+        TEXT_EMOTE_POUNCE,
+        TEXT_EMOTE_PRAISE,
+        TEXT_EMOTE_PURR,
+        TEXT_EMOTE_PUZZLE,
+        TEXT_EMOTE_RAISE,
+        TEXT_EMOTE_READY,
+        TEXT_EMOTE_SHIMMY,
+        TEXT_EMOTE_SHIVER,
+        TEXT_EMOTE_SHOO,
+        TEXT_EMOTE_SLAP,
+        TEXT_EMOTE_SMIRK,
+        TEXT_EMOTE_SNIFF,
+        TEXT_EMOTE_SNUB,
+        TEXT_EMOTE_SOOTHE,
+        TEXT_EMOTE_STINK,
+        TEXT_EMOTE_TAUNT,
+        TEXT_EMOTE_TEASE,
+        TEXT_EMOTE_THIRSTY,
+        TEXT_EMOTE_VETO,
+        TEXT_EMOTE_SNICKER,
+        TEXT_EMOTE_STAND,
+        TEXT_EMOTE_TICKLE,
+        TEXT_EMOTE_VIOLIN,
+        TEXT_EMOTE_SMILE,
+        TEXT_EMOTE_RASP,
+        TEXT_EMOTE_PITY,
+        TEXT_EMOTE_GROWL,
+        TEXT_EMOTE_BARK,
+        TEXT_EMOTE_SCARED,
+        TEXT_EMOTE_FLOP,
+        TEXT_EMOTE_LOVE,
+        TEXT_EMOTE_MOO,
+        TEXT_EMOTE_COMMEND,
+        TEXT_EMOTE_TRAIN,
+        TEXT_EMOTE_HELPME,
+        TEXT_EMOTE_INCOMING,
+        TEXT_EMOTE_CHARGE,
+        TEXT_EMOTE_FLEE,
+        TEXT_EMOTE_ATTACKMYTARGET,
+        TEXT_EMOTE_OOM,
+        TEXT_EMOTE_FOLLOW,
+        TEXT_EMOTE_WAIT,
+        TEXT_EMOTE_HEALME,
+        TEXT_EMOTE_OPENFIRE,
+        TEXT_EMOTE_FLIRT,
+        TEXT_EMOTE_JOKE,
+        TEXT_EMOTE_GOLFCLAP,
+        TEXT_EMOTE_WINK,
+        TEXT_EMOTE_PAT,
+        TEXT_EMOTE_SERIOUS,
+        TEXT_EMOTE_MOUNT_SPECIAL,
+        TEXT_EMOTE_GOODLUCK,
+        TEXT_EMOTE_BLAME,
+        TEXT_EMOTE_BLANK,
+        TEXT_EMOTE_BRANDISH,
+        TEXT_EMOTE_BREATH,
+        TEXT_EMOTE_DISAGREE,
+        TEXT_EMOTE_DOUBT,
+        TEXT_EMOTE_EMBARRASS,
+        TEXT_EMOTE_ENCOURAGE,
+        TEXT_EMOTE_ENEMY,
+        TEXT_EMOTE_EYEBROW,
+        TEXT_EMOTE_TOAST,
+        TEXT_EMOTE_FAIL,
+        TEXT_EMOTE_HIGHFIVE,
+        TEXT_EMOTE_ABSENT,
+        TEXT_EMOTE_ARM,
+        TEXT_EMOTE_AWE,
+        TEXT_EMOTE_BACKPACK,
+        TEXT_EMOTE_BADFEELING,
+        TEXT_EMOTE_CHALLENGE,
+        TEXT_EMOTE_CHUG,
+        TEXT_EMOTE_DING,
+        TEXT_EMOTE_FACEPALM,
+        TEXT_EMOTE_FAINT,
+        TEXT_EMOTE_GO,
+        TEXT_EMOTE_GOING,
+        TEXT_EMOTE_GLOWER,
+        TEXT_EMOTE_HEADACHE,
+        TEXT_EMOTE_HICCUP,
+        TEXT_EMOTE_HISS,
+        TEXT_EMOTE_HOLDHAND,
+        TEXT_EMOTE_HURRY,
+        TEXT_EMOTE_IDEA,
+        TEXT_EMOTE_JEALOUS,
+        TEXT_EMOTE_LUCK,
+        TEXT_EMOTE_MAP,
+        TEXT_EMOTE_MERCY,
+        TEXT_EMOTE_MUTTER,
+        TEXT_EMOTE_NERVOUS,
+        TEXT_EMOTE_OFFER,
+        TEXT_EMOTE_PET,
+        TEXT_EMOTE_PINCH,
+        TEXT_EMOTE_PROUD,
+        TEXT_EMOTE_PROMISE,
+        TEXT_EMOTE_PULSE,
+        TEXT_EMOTE_PUNCH,
+        TEXT_EMOTE_POUT,
+        TEXT_EMOTE_REGRET,
+        TEXT_EMOTE_REVENGE,
+        TEXT_EMOTE_ROLLEYES,
+        TEXT_EMOTE_RUFFLE,
+        TEXT_EMOTE_SAD,
+        TEXT_EMOTE_SCOFF,
+        TEXT_EMOTE_SCOLD,
+        TEXT_EMOTE_SCOWL,
+        TEXT_EMOTE_SEARCH,
+        TEXT_EMOTE_SHAKEFIST,
+        TEXT_EMOTE_SHIFTY,
+        TEXT_EMOTE_SHUDDER,
+        TEXT_EMOTE_SIGNAL,
+        TEXT_EMOTE_SILENCE,
+        TEXT_EMOTE_SING,
+        TEXT_EMOTE_SMACK,
+        TEXT_EMOTE_SNEAK,
+        TEXT_EMOTE_SNEEZE,
+        TEXT_EMOTE_SNORT,
+        TEXT_EMOTE_SQUEAL,
+        TEXT_EMOTE_STOPATTACK,
+        TEXT_EMOTE_SUSPICIOUS,
+        TEXT_EMOTE_THINK,
+        TEXT_EMOTE_TRUCE,
+        TEXT_EMOTE_TWIDDLE,
+        TEXT_EMOTE_WARN,
+        TEXT_EMOTE_SNAP,
+        TEXT_EMOTE_CHARM,
+        TEXT_EMOTE_COVEREARS,
+        TEXT_EMOTE_CROSSARMS,
+        TEXT_EMOTE_LOOK,
+        TEXT_EMOTE_OBJECT,
+        TEXT_EMOTE_SWEAT,
+        TEXT_EMOTE_YW};  
 
-            if (unit && (unit->HasNpcFlag(UNIT_NPC_FLAG_TRAINER) ||
-                         unit->HasNpcFlag(UNIT_NPC_FLAG_QUESTGIVER)))
-            {
-                types.push_back(TEXT_EMOTE_SALUTE);
-            }
-        }
-        return types[urand(0, types.size() - 1)];
-    }
+    // ----- CHOIX ALÉATOIRE -----
+    return emotes[urand(0, emotes.size() - 1)];
 
-    if (!urand(0, 20))
-    {
-        // expressions
-        types.push_back(EMOTE_ONESHOT_BOW);
-        types.push_back(EMOTE_ONESHOT_RUDE);
-        types.push_back(EMOTE_ONESHOT_CRY);
-        types.push_back(EMOTE_ONESHOT_LAUGH);
-        types.push_back(EMOTE_ONESHOT_POINT);
-        types.push_back(EMOTE_ONESHOT_CHEER);
-        types.push_back(EMOTE_ONESHOT_SHY);
-    }
-    else
-    {
-        // talk
-        types.push_back(EMOTE_ONESHOT_TALK);
-        types.push_back(EMOTE_ONESHOT_EXCLAMATION);
-        types.push_back(EMOTE_ONESHOT_QUESTION);
-
-        if (unit && (unit->HasNpcFlag(UNIT_NPC_FLAG_TRAINER) ||
-                     unit->HasNpcFlag(UNIT_NPC_FLAG_QUESTGIVER)))
-        {
-            types.push_back(EMOTE_ONESHOT_SALUTE);
-        }
-    }
-
-    return types[urand(0, types.size() - 1)];
 }
 
 uint32 EmoteActionBase::GetNumberOfEmoteVariants(TextEmotes emote, uint8 Race, uint8 Gender)

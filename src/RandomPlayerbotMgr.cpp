@@ -63,40 +63,71 @@ struct GuidClassRaceInfo
 enum class CityId : uint8 {
     STORMWIND, IRONFORGE, DARNASSUS, EXODAR,
     ORGRIMMAR, UNDERCITY, THUNDER_BLUFF, SILVERMOON_CITY,
-    SHATTRATH_CITY, DALARAN
+    SHATTRATH_CITY, DALARAN, CABESTAN, ZONE52, LONG_WATCH, GADGETZAN, BOOTY_BAY
 };
 
 enum class FactionId : uint8 { ALLIANCE, HORDE, NEUTRAL };
 
 // Map of banker entry → city + faction
-static const std::unordered_map<uint16, std::pair<CityId, FactionId>> bankerToCity = {
-    {2455,  {CityId::STORMWIND,       FactionId::ALLIANCE}}, {2456,  {CityId::STORMWIND,       FactionId::ALLIANCE}}, {2457,  {CityId::STORMWIND,       FactionId::ALLIANCE}},
-    {2460,  {CityId::IRONFORGE,       FactionId::ALLIANCE}}, {2461,  {CityId::IRONFORGE,       FactionId::ALLIANCE}}, {5099,  {CityId::IRONFORGE,       FactionId::ALLIANCE}},
-    {4155,  {CityId::DARNASSUS,       FactionId::ALLIANCE}}, {4208,  {CityId::DARNASSUS,       FactionId::ALLIANCE}}, {4209,  {CityId::DARNASSUS,       FactionId::ALLIANCE}},
-    {17773, {CityId::EXODAR,          FactionId::ALLIANCE}}, {18350, {CityId::EXODAR,          FactionId::ALLIANCE}}, {16710, {CityId::EXODAR,          FactionId::ALLIANCE}},
-    {3320,  {CityId::ORGRIMMAR,       FactionId::HORDE}},    {3309,  {CityId::ORGRIMMAR,       FactionId::HORDE}},    {3318,  {CityId::ORGRIMMAR,       FactionId::HORDE}},
-    {4549,  {CityId::UNDERCITY,       FactionId::HORDE}},    {2459,  {CityId::UNDERCITY,       FactionId::HORDE}},    {2458,  {CityId::UNDERCITY,       FactionId::HORDE}},    {4550, {CityId::UNDERCITY, FactionId::HORDE}},
-    {2996,  {CityId::THUNDER_BLUFF,   FactionId::HORDE}},    {8356,  {CityId::THUNDER_BLUFF,   FactionId::HORDE}},    {8357,  {CityId::THUNDER_BLUFF,   FactionId::HORDE}},
-    {17631, {CityId::SILVERMOON_CITY, FactionId::HORDE}},    {17632, {CityId::SILVERMOON_CITY, FactionId::HORDE}},    {17633, {CityId::SILVERMOON_CITY, FactionId::HORDE}},
-    {16615, {CityId::SILVERMOON_CITY, FactionId::HORDE}},    {16616, {CityId::SILVERMOON_CITY, FactionId::HORDE}},    {16617, {CityId::SILVERMOON_CITY, FactionId::HORDE}},
-    {19246, {CityId::SHATTRATH_CITY,  FactionId::NEUTRAL}},  {19338, {CityId::SHATTRATH_CITY,  FactionId::NEUTRAL}},
-    {19034, {CityId::SHATTRATH_CITY,  FactionId::NEUTRAL}},  {19318, {CityId::SHATTRATH_CITY,  FactionId::NEUTRAL}},
-    {30604, {CityId::DALARAN,         FactionId::NEUTRAL}},  {30605, {CityId::DALARAN,         FactionId::NEUTRAL}},  {30607, {CityId::DALARAN,         FactionId::NEUTRAL}},
-    {28675, {CityId::DALARAN,         FactionId::NEUTRAL}},  {28676, {CityId::DALARAN,         FactionId::NEUTRAL}},  {28677, {CityId::DALARAN,         FactionId::NEUTRAL}}
+static const std::unordered_map<uint32, std::pair<CityId, FactionId>> bankerToCity = {
+    {950000,  {CityId::STORMWIND,       FactionId::ALLIANCE}}, {950001,  {CityId::STORMWIND,       FactionId::ALLIANCE}}, {950002,  {CityId::STORMWIND,       FactionId::ALLIANCE}},
+    {950003,  {CityId::STORMWIND,       FactionId::ALLIANCE}}, {950004,  {CityId::STORMWIND,       FactionId::ALLIANCE}}, {950005,  {CityId::STORMWIND,       FactionId::ALLIANCE}},
+    {950006,  {CityId::STORMWIND,       FactionId::ALLIANCE}},
+
+    {950013,  {CityId::IRONFORGE,       FactionId::ALLIANCE}}, {950014,  {CityId::IRONFORGE,       FactionId::ALLIANCE}}, {950015,  {CityId::IRONFORGE,       FactionId::ALLIANCE}},
+    {950016,  {CityId::IRONFORGE,       FactionId::ALLIANCE}}, {950017,  {CityId::IRONFORGE,       FactionId::ALLIANCE}},
+
+    {950007,  {CityId::DARNASSUS,       FactionId::ALLIANCE}}, {950008,  {CityId::DARNASSUS,       FactionId::ALLIANCE}}, {950009,  {CityId::DARNASSUS,       FactionId::ALLIANCE}},
+    {950010,  {CityId::DARNASSUS,       FactionId::ALLIANCE}}, {950011,  {CityId::DARNASSUS,       FactionId::ALLIANCE}}, {950012,  {CityId::DARNASSUS,       FactionId::ALLIANCE}},
+
+    {950018,  {CityId::EXODAR,          FactionId::ALLIANCE}}, {950019,  {CityId::EXODAR,          FactionId::ALLIANCE}}, {950020,  {CityId::EXODAR,          FactionId::ALLIANCE}},
+    {950021,  {CityId::EXODAR,          FactionId::ALLIANCE}},
+
+    {950022,  {CityId::ORGRIMMAR,       FactionId::HORDE}},    {950023,  {CityId::ORGRIMMAR,       FactionId::HORDE}},    {950024,  {CityId::ORGRIMMAR,       FactionId::HORDE}},
+    {950025,  {CityId::ORGRIMMAR,       FactionId::HORDE}},    {950026,  {CityId::ORGRIMMAR,       FactionId::HORDE}},    {950027,  {CityId::ORGRIMMAR,       FactionId::HORDE}},
+
+    {950040,  {CityId::UNDERCITY,       FactionId::HORDE}},    {950041,  {CityId::UNDERCITY,       FactionId::HORDE}},    {950042,  {CityId::UNDERCITY,       FactionId::HORDE}}, 
+    {950043,  {CityId::UNDERCITY,       FactionId::HORDE}},    {950044,  {CityId::UNDERCITY,       FactionId::HORDE}},
+    
+    {950034,  {CityId::THUNDER_BLUFF,   FactionId::HORDE}},    {950035,  {CityId::THUNDER_BLUFF,   FactionId::HORDE}},    {950036,  {CityId::THUNDER_BLUFF,   FactionId::HORDE}},
+    {950037,  {CityId::THUNDER_BLUFF,   FactionId::HORDE}},    {950038,  {CityId::THUNDER_BLUFF,   FactionId::HORDE}},    {950039,  {CityId::THUNDER_BLUFF,   FactionId::HORDE}},
+    
+    {950028,  {CityId::SILVERMOON_CITY, FactionId::HORDE}},    {950029,  {CityId::SILVERMOON_CITY, FactionId::HORDE}},    {950030,  {CityId::SILVERMOON_CITY, FactionId::HORDE}},
+    {950031,  {CityId::SILVERMOON_CITY, FactionId::HORDE}},    {950032,  {CityId::SILVERMOON_CITY, FactionId::HORDE}},    {950033,  {CityId::SILVERMOON_CITY, FactionId::HORDE}},
+    
+    {950048,  {CityId::SHATTRATH_CITY,  FactionId::NEUTRAL}},  {950049,  {CityId::SHATTRATH_CITY,   FactionId::NEUTRAL}}, {950050,  {CityId::SHATTRATH_CITY,  FactionId::NEUTRAL}},
+    {950051,  {CityId::SHATTRATH_CITY,  FactionId::NEUTRAL}}, 
+
+    {950054,  {CityId::DALARAN,         FactionId::NEUTRAL}},  {950055,  {CityId::DALARAN,   FactionId::NEUTRAL}},        {950056,  {CityId::DALARAN,  FactionId::NEUTRAL}},
+    
+    {950046,  {CityId::CABESTAN,        FactionId::NEUTRAL}},
+    
+    {950047,  {CityId::ZONE52,          FactionId::NEUTRAL}},
+
+    {950045,  {CityId::LONG_WATCH,      FactionId::NEUTRAL}},
+
+    {950052,  {CityId::GADGETZAN,       FactionId::NEUTRAL}},
+
+    {950053,  {CityId::BOOTY_BAY,       FactionId::NEUTRAL}}
 };
 
 // Map of city → available banker entries
-static const std::unordered_map<CityId, std::vector<uint16>> cityToBankers = {
-    {CityId::STORMWIND,       {2455, 2456, 2457}},
-    {CityId::IRONFORGE,       {2460, 2461, 5099}},
-    {CityId::DARNASSUS,       {4155, 4208, 4209}},
-    {CityId::EXODAR,          {17773, 18350, 16710}},
-    {CityId::ORGRIMMAR,       {3320, 3309, 3318}},
-    {CityId::UNDERCITY,       {4549, 2459, 2458, 4550}},
-    {CityId::THUNDER_BLUFF,   {2996, 8356, 8357}},
-    {CityId::SILVERMOON_CITY, {17631, 17632, 17633, 16615, 16616, 16617}},
-    {CityId::SHATTRATH_CITY,  {19246, 19338, 19034, 19318}},
-    {CityId::DALARAN,         {30604, 30605, 30607, 28675, 28676, 28677, 29530}}
+static const std::unordered_map<CityId, std::vector<uint32>> cityToBankers = {
+    {CityId::STORMWIND,       {950000, 950001, 950002, 950003, 950004, 950005, 950006}},
+    {CityId::IRONFORGE,       {950013, 950014, 950015, 950016, 950017}},
+    {CityId::DARNASSUS,       {950007, 950008, 950009, 950010, 950011, 950012}},
+    {CityId::EXODAR,          {950018, 950019, 950020, 950021}},
+    {CityId::ORGRIMMAR,       {950022, 950023, 950024, 950025, 950026, 950027}},
+    {CityId::UNDERCITY,       {950040, 950041, 950042, 950043, 950044}},
+    {CityId::THUNDER_BLUFF,   {950034, 950035, 950036, 950037, 950038, 950039}},
+    {CityId::SILVERMOON_CITY, {950028, 950029, 950030, 950031, 950032, 950033}},
+    {CityId::SHATTRATH_CITY,  {950048, 950049, 950050, 950051}}, 
+    {CityId::DALARAN,         {950054, 950055, 950056}},
+    {CityId::CABESTAN,        {950046}},
+    {CityId::ZONE52,          {950047}},
+    {CityId::LONG_WATCH,      {950045}},
+    {CityId::GADGETZAN,       {950052}},
+    {CityId::BOOTY_BAY,       {950053}}
 };
 
 // Quick lookup map: banker entry → location
@@ -2066,12 +2097,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
         "creature c "
         "INNER JOIN creature_template t on c.id1 = t.entry "
         "WHERE "
-        "t.npcflag & 131072 "
-        "AND t.npcflag != 135298 "
-        "AND t.minlevel != 55 "
-        "AND t.minlevel != 65 "
-        "AND t.faction not in (35, 474, 69, 57) "
-        "AND t.entry not in (30606, 30608, 29282) "
+        "t.npcflag = 99 "
         "AND map IN ({}) "
         "ORDER BY "
         "t.minlevel;",
@@ -2235,6 +2261,11 @@ void RandomPlayerbotMgr::RandomTeleportForLevel(Player* bot)
                 case CityId::SILVERMOON_CITY: weight = sPlayerbotAIConfig->weightTeleToSilvermoonCity; break;
                 case CityId::SHATTRATH_CITY:  weight = sPlayerbotAIConfig->weightTeleToShattrathCity; break;
                 case CityId::DALARAN:         weight = sPlayerbotAIConfig->weightTeleToDalaran; break;
+                case CityId::CABESTAN:        weight = sPlayerbotAIConfig->weightTeleToCabestan; break;
+                case CityId::ZONE52:          weight = sPlayerbotAIConfig->weightTeleToZone52; break;
+                case CityId::LONG_WATCH:      weight = sPlayerbotAIConfig->weightTeleToLongwatch; break;
+                case CityId::GADGETZAN:       weight = sPlayerbotAIConfig->weightTeleToGadgetzan; break;
+                case CityId::BOOTY_BAY:       weight = sPlayerbotAIConfig->weightTeleToBootybay; break;
                 default:              weight = 0; break;
             }
             if (weight <= 0) continue;

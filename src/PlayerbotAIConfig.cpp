@@ -152,6 +152,11 @@ bool PlayerbotAIConfig::Initialize()
     weightTeleToSilvermoonCity = sConfigMgr->GetOption<int>("AiPlayerbot.TeleToSilvermoonCityWeight", 1);
     weightTeleToShattrathCity = sConfigMgr->GetOption<int>("AiPlayerbot.TeleToShattrathCityWeight", 1);
     weightTeleToDalaran = sConfigMgr->GetOption<int>("AiPlayerbot.TeleToDalaranWeight", 1);
+    weightTeleToCabestan = sConfigMgr->GetOption<int>("AiPlayerbot.TeleToCabestanWeight", 1);
+    weightTeleToZone52 = sConfigMgr->GetOption<int>("AiPlayerbot.TeleToZone52Weight", 1);
+    weightTeleToLongwatch = sConfigMgr->GetOption<int>("AiPlayerbot.TeleToLongwatchWeight", 1);
+    weightTeleToGadgetzan = sConfigMgr->GetOption<int>("AiPlayerbot.TeleToGadgetzanWeight", 1);
+    weightTeleToBootybay = sConfigMgr->GetOption<int>("AiPlayerbot.TeleToBootybayWeight", 1);
     LoadList<std::vector<uint32>>(
         sConfigMgr->GetOption<std::string>("AiPlayerbot.RandomBotQuestItems",
                                            "5175,5176,5177,5178,6948,11000,12382,13704,16309"),

@@ -113,6 +113,11 @@ public:
     int weightTeleToSilvermoonCity;
     int weightTeleToShattrathCity;
     int weightTeleToDalaran;
+    int weightTeleToCabestan;
+    int weightTeleToZone52;
+    int weightTeleToLongwatch;
+    int weightTeleToGadgetzan;
+    int weightTeleToBootybay;
     std::vector<uint32> randomBotMaps;
     std::vector<uint32> randomBotQuestItems;
     std::vector<uint32> randomBotAccounts;

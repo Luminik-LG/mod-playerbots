@@ -34,20 +34,26 @@ struct Capital
     uint32              zoneId;
     TeamId              team;
     char const*         name;
-    std::vector<uint16> bankers;
+    std::vector<uint32> bankers; // Changé uint16 en uint32 pour tes IDs 950000
 };
 
 static const std::vector<Capital> capitals = {
-    { AREA_STORMWIND_CITY,  TEAM_ALLIANCE, "Stormwind",     {2455, 2456, 2457} },
-    { AREA_IRONFORGE,       TEAM_ALLIANCE, "Ironforge",     {2460, 2461, 5099} },
-    { AREA_DARNASSUS,       TEAM_ALLIANCE, "Darnassus",     {4155, 4208, 4209} },
-    { AREA_THE_EXODAR,      TEAM_ALLIANCE, "Exodar",        {17773, 18350, 16710} },
-    { AREA_ORGRIMMAR,       TEAM_HORDE,    "Orgrimmar",     {3320, 3309, 3318} },
-    { AREA_UNDERCITY,       TEAM_HORDE,    "Undercity",     {4549, 2459, 2458, 4550} },
-    { AREA_THUNDER_BLUFF,   TEAM_HORDE,    "Thunder Bluff", {2996, 8356, 8357} },
-    { AREA_SILVERMOON_CITY, TEAM_HORDE,    "Silvermoon",    {17631, 17632, 17633, 16615, 16616, 16617} },
-    { AREA_SHATTRATH_CITY,  TEAM_NEUTRAL,  "Shattrath",     {19246, 19338, 19034, 19318} },
-    { AREA_DALARAN,         TEAM_NEUTRAL,  "Dalaran",       {30604, 30605, 30607, 28675, 28676, 28677, 29530} }
+    { AREA_STORMWIND_CITY,  TEAM_ALLIANCE, "Stormwind",     {950000, 950001, 950002, 950003, 950004, 950005, 950006} },
+    { AREA_IRONFORGE,       TEAM_ALLIANCE, "Ironforge",     {950013, 950014, 950015, 950016, 950017} },
+    { AREA_DARNASSUS,       TEAM_ALLIANCE, "Darnassus",     {950007, 950008, 950009, 950010, 950011, 950012} },
+    { AREA_THE_EXODAR,      TEAM_ALLIANCE, "Exodar",        {950018, 950019, 950020, 950021} },
+    { AREA_ORGRIMMAR,       TEAM_HORDE,    "Orgrimmar",     {950022, 950023, 950024, 950025, 950026, 950027} },
+    { AREA_UNDERCITY,       TEAM_HORDE,    "Undercity",     {950040, 950041, 950042, 950043, 950044} },
+    { AREA_THUNDER_BLUFF,   TEAM_HORDE,    "Thunder Bluff", {950034, 950035, 950036, 950037, 950038, 950039} },
+    { AREA_SILVERMOON_CITY, TEAM_HORDE,    "Silvermoon",    {950028, 950029, 950030, 950031, 950032, 950033} },
+    { AREA_SHATTRATH_CITY,  TEAM_NEUTRAL,  "Shattrath",     {950048, 950049, 950050, 950051} },
+    { AREA_DALARAN,         TEAM_NEUTRAL,  "Dalaran",       {950054, 950055, 950056} },
+    // Tes destinations avec les constantes AC :
+    { 1617,                 TEAM_NEUTRAL,  "Cabestan",      {950046} }, 
+    { 3712,                 TEAM_NEUTRAL,  "Zone52",        {950047} },
+    { 2337,                 TEAM_NEUTRAL,  "Longwatch",     {950045} },
+    { 1619,                 TEAM_NEUTRAL,  "Gadgetzan",     {950052} },
+    { 35,                   TEAM_NEUTRAL,  "Bootybay",      {950053} }
 };
 
 static Capital const* FindCapitalByZone(uint32 zoneId)
@@ -58,10 +64,10 @@ static Capital const* FindCapitalByZone(uint32 zoneId)
     return nullptr;
 }
 
-static Capital const* FindCapitalByBanker(uint16 bankerEntry)
+static Capital const* FindCapitalByBanker(uint32 bankerEntry) // Changé uint16 en uint32
 {
     for (Capital const& capital : capitals)
-        for (uint16 bankerId : capital.bankers)
+        for (uint32 bankerId : capital.bankers) // Changé uint16 en uint32
             if (bankerId == bankerEntry)
                 return &capital;
     return nullptr;
@@ -81,6 +87,11 @@ static int GetCityWeight(uint32 zoneId)
         case AREA_SILVERMOON_CITY: return sPlayerbotAIConfig.weightTeleToSilvermoonCity;
         case AREA_SHATTRATH_CITY:  return sPlayerbotAIConfig.weightTeleToShattrathCity;
         case AREA_DALARAN:         return sPlayerbotAIConfig.weightTeleToDalaran;
+        case 1617:                 return sPlayerbotAIConfig.weightTeleToCabestan;
+        case 3712:                 return sPlayerbotAIConfig.weightTeleToZone52;
+        case 2337:                 return sPlayerbotAIConfig.weightTeleToLongwatch;
+        case 1619:                 return sPlayerbotAIConfig.weightTeleToGadgetzan;
+        case 35:                   return sPlayerbotAIConfig.weightTeleToBootybay;
     }
     return 0;
 }
@@ -4773,40 +4784,28 @@ void TravelMgr::PrepareDestinationCache()
                 }
             }
         }
-        // === BANKERS ===
-        else if (creatureTemplate->npcflag & UNIT_NPC_FLAG_BANKER &&
-                 creatureTemplate->npcflag != 135298 &&
-                 creatureTemplate->minlevel != 55 &&
-                 creatureTemplate->minlevel != 65 &&
-                 creatureTemplate->faction != 35 && creatureTemplate->faction != 474 &&
-                 creatureTemplate->faction != 69 && creatureTemplate->faction != 57 &&
-                 creatureTemplate->Entry != 30606 && creatureTemplate->Entry != 30608 &&
-                 creatureTemplate->Entry != 29282)
+        
+        // === BANKERS TES BANQUIERS UNIQUEMENT (Flag 99 + IDs 950000-950056) ===
+        else if (creatureTemplate->npcflag == 99 && templateEntry >= 950000 && templateEntry <= 950056)
         {
             BankerLocation bLoc;
             bLoc.loc = WorldLocation(mapId, x + cos(orient) * 6.0f, y + sin(orient) * 6.0f, z + 2.0f, orient + M_PI);
             bLoc.entry = templateEntry;
-            uint32 level = (creatureTemplate->minlevel + creatureTemplate->maxlevel + 1) / 2;
+
+            uint32 bankerLevel = (creatureTemplate->minlevel + creatureTemplate->maxlevel + 1) / 2;
+
             for (int32 l = 1; l <= maxLevel; l++)
             {
-                // Bots 1-60 go to base game bankers (all have minlevel 30 or 45)
-                if (l <=60 && level > 45)
-                    continue;
-
-                // Bots 61-70 go to Shattrath bankers (all have minlevel 60 or 70)
-                if ((l >=61 && l <=70) && (level < 60 || level > 70))
-                    continue;
-
-                // Bots 71+ go to Dalaran bankers (all have minlevel 75)
-                if ((l >=71) && level != 75)
-                    continue;
+                if (l <= 60 && bankerLevel > 45) continue;
+                if ((l >= 61 && l <= 70) && (bankerLevel < 60 || bankerLevel > 70)) continue;
+                if ((l >= 71) && bankerLevel != 75) continue;
 
                 bankerLocsPerLevelCache[(uint8)l].push_back(bLoc);
                 bankerEntryToLocation[bLoc.entry] = bLoc.loc;
             }
             bankerCount++;
         }
-    }
+    } // <--- CETTE ACCOLADE ÉTAIT MANQUANTE : Elle ferme la boucle sObjectMgr->GetAllCreatureData()
 
     // Process temporary caches
     for (auto const& [gridTuple, creatureDataList] : tempLocsCache)

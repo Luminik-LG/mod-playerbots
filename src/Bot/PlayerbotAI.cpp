@@ -58,6 +58,8 @@
 #include "UpdateTime.h"
 #include "Vehicle.h"
 
+#include "PlayerbotFactory.h"
+
 constexpr uint32 SPELL_TITAN_GRIP = 49152;
 constexpr uint32 SPELL_DK_FROST_PRESENCE = 48263;
 
@@ -263,7 +265,33 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
         if (HasCheat(BotCheatMask::power) && bot->getPowerType() != POWER_MANA)
             bot->SetPower(bot->getPowerType(), bot->GetMaxPower(bot->getPowerType()));
     }
+/*
+    // -------------------------------------------------------
+    // SYNCHRONISATION DU NIVEAU (ALT-BOTS SUR LE JOUEUR)
+    // -------------------------------------------------------
+    Player* master = GetMaster();
+    
+    // On vérifie : 
+    // 1. Le bot a un maître 
+    // 2. Le maître n'est PAS un bot (c'est un vrai joueur) -> !GET_PLAYERBOT_AI(master)
+    // 3. Le bot actuel n'est PAS un bot aléatoire du monde
+    if (master && !GET_PLAYERBOT_AI(master) && !sRandomPlayerbotMgr.IsRandomBot(bot))
+    {
+        if (bot->GetLevel() != master->GetLevel())
+        {
+            bot->SetLevel(master->GetLevel());
+            bot->InitStatsForLevel();
+            bot->UpdateAllStats();
 
+            // Maintenant que PlayerbotFactory.h est inclus, ceci fonctionnera
+            PlayerbotFactory factory(bot, bot->GetLevel());
+            factory.Refresh();
+
+            Reset(); 
+        }
+    }
+    // -------------------------------------------------------
+*/
     AllowActivity();
 
     if (!CanUpdateAI())

@@ -16,6 +16,7 @@
 #include "Playerbots.h"
 #include "ServerFacade.h"
 #include "SpellAuraEffects.h"
+#include "TravelAction.h"
 
 static constexpr uint32 SPELL_COLD_WEATHER_FLYING = 54197;
 static constexpr float PARACHUTE_LAND_THRESHOLD = 15.0f;
@@ -98,8 +99,64 @@ bool CheckMountStateAction::Execute(Event /*event*/)
     }
     else
     {
+    // 1. CAS DES ALTBOTS (Bots en groupe qui vous suivent) :
+    Player* masterPlayer = GetMaster();
+    bool isMasterMounted = masterPlayer && masterPlayer != bot && 
+        (masterPlayer->IsMounted() || masterInShapeshiftForm == FORM_TRAVEL || 
+         masterInShapeshiftForm == FORM_FLIGHT || masterInShapeshiftForm == FORM_FLIGHT_EPIC);
+
+    if (isMasterMounted)
+    {
         shouldMount = true;
     }
+    else
+    {
+        // 2. CAS DES RANDOMBOTS (Bots autonomes) :
+        float distanceToTravel = 0.0f;
+        bool hasDestination = false;
+
+        // A) Vérifier s'il a un TravelTarget actif (grand voyage de zone) :
+        TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
+        if (travelTarget && travelTarget->isActive() && travelTarget->getPosition())
+        {
+            distanceToTravel = travelTarget->getPosition()->distance(bot);
+            hasDestination = true;
+        }
+        else
+        {
+            // B) Sinon, interroger le MotionMaster natif d'AzerothCore (déplacements RPG/Quêtes) :
+            float destX, destY, destZ;
+            if (bot->GetMotionMaster()->GetDestination(destX, destY, destZ))
+            {
+                distanceToTravel = bot->GetDistance2d(destX, destY);
+                hasDestination = true;
+            }
+        }
+
+        // C) Évaluation des conditions de montage ET de démontage :
+        if (hasDestination)
+        {
+            // Monter à cheval pour les trajets > 45 mètres :
+            shouldMount = (distanceToTravel > 45.0f);
+
+            // NOUVEAU : Si le bot est DÉJÀ à cheval et que le trajet (ou la fin de trajet) fait < 30 mètres : DÉMONTER !
+            if (bot->IsMounted() && distanceToTravel < 30.0f)
+            {
+                shouldDismount = true;
+            }
+        }
+        else
+        {
+            shouldMount = false;
+
+            // Si le bot n'a plus aucune destination et qu'il est à cheval : il démonte !
+            if (bot->IsMounted())
+            {
+                shouldDismount = true;
+            }
+        }
+    }
+}
 
     // If should dismount, or master (if any) is no longer in travel form, yet bot still is, remove the shapeshifts
     if (shouldDismount ||
@@ -472,7 +529,7 @@ float CheckMountStateAction::CalculateMountDistance() const
     // 21 / 7  =  21 / 14 + 1.5  =  3   (7 = dismounted speed  14 = epic-mount speed  1.5 = mount-spell cast time)
     bool isMelee = PlayerbotAI::IsMelee(bot);
     float baseDistance = isMelee ? sPlayerbotAIConfig.meleeDistance + 10.0f : sPlayerbotAIConfig.spellDistance + 10.0f;
-    return std::max(121.0f, baseDistance);
+    return std::max(21.0f, baseDistance);
 }
 
 bool CheckMountStateAction::ShouldFollowMasterMountState(Player* master, bool noAttackers, bool shouldMount) const
